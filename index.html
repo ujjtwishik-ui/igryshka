@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windows 7</title>
+<style>
+  *{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:'Segoe UI',Tahoma,sans-serif;background:#000}
+  ::-webkit-scrollbar{width:12px}
+  ::-webkit-scrollbar-track{background:#111}
+  ::-webkit-scrollbar-thumb{background:#444;border-radius:6px}
+
+  /* ============ UNITY SPLASH ============ */
+  #game{position:fixed;inset:0;width:100%;height:100%;z-index:1;background:#000;display:none}
+  #splash{
+    position:fixed;inset:0;z-index:9500;background:#000;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:26px;transition:opacity 1s ease;color:#fff;font-family:'Segoe UI',Tahoma,sans-serif
+  }
+  #splash.hide{opacity:0;pointer-events:none}
+  #splash .warning{
+    position:absolute;top:34px;left:50%;transform:translateX(-50%);
+    background:rgba(255,0,0,.12);border:2px solid rgba(255,60,60,.65);
+    color:#ff5555;padding:10px 26px;border-radius:10px;
+    font-size:13px;letter-spacing:3px;text-transform:uppercase;font-weight:700;
+    opacity:0;text-align:center;white-space:nowrap;
+    box-shadow:0 0 24px rgba(255,0,0,.35);
+    animation:warningPulse 1.8s ease-in-out infinite;
+  }
+  #splash .warning.in{opacity:1;transition:opacity .8s ease}
+  @keyframes warningPulse{
+    0%,100%{box-shadow:0 0 24px rgba(255,0,0,.35);border-color:rgba(255,60,60,.65)}
+    50%{box-shadow:0 0 40px rgba(255,0,0,.75);border-color:rgba(255,120,120,.95)}
+  }
+  #splash img{
+    width:180px;height:180px;border-radius:22px;
+    filter:drop-shadow(0 0 34px rgba(120,180,255,.55)) drop-shadow(0 0 90px rgba(80,140,255,.25));
+    animation:splashFloat 2.6s ease-in-out infinite;
+    opacity:0;transform:scale(.75)
+  }
+  #splash img.in{opacity:1;transform:scale(1);transition:opacity 1s ease, transform 1s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes splashFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.03)}}
+  #splash .label{font-size:17px;letter-spacing:3px;color:#cfd8e6;opacity:0;text-transform:uppercase}
+  #splash .label b{color:#7db6ff;font-weight:700;text-shadow:0 0 14px rgba(120,180,255,.7)}
+  #splash .label.in{opacity:1;transition:opacity 1.1s ease .35s}
+  #splash .bar{
+    width:280px;height:5px;background:rgba(255,255,255,.09);border-radius:4px;overflow:hidden;
+    box-shadow:inset 0 0 6px rgba(0,0,0,.8);opacity:0
+  }
+  #splash .bar.in{opacity:1;transition:opacity .6s ease .55s}
+  #splash .bar i{
+    display:block;height:100%;width:0%;
+    background:linear-gradient(90deg,#2b6cd6,#7db6ff,#c7e2ff);
+    box-shadow:0 0 14px rgba(120,180,255,.9);transition:width .18s linear
+  }
+  #splash .sub{font-size:11px;letter-spacing:4px;color:#5b6b80;opacity:0;text-transform:uppercase}
+  #splash .sub.in{opacity:1;transition:opacity 1.1s ease .9s}
+  #splash .unity-mark{
+    position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+    font-size:11px;letter-spacing:3px;color:#3c4757;opacity:0;
+    display:flex;align-items:center;gap:8px;text-transform:uppercase
+  }
+  #splash .unity-mark.in{opacity:1;transition:opacity 1.2s ease 1.1s}
+  #splash .unity-mark::before{
+    content:'';width:14px;height:14px;
+    background:linear-gradient(135deg,#7db6ff,#2b6cd6);
+    clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    box-shadow:0 0 10px rgba(120,180,255,.7)
+  }
+
+  /* ============ DESKTOP ============ */
+  #desktop{
+    position:fixed;inset:0;overflow:hidden;opacity:0;transition:opacity 1.1s ease;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(190,230,255,.95) 0%, rgba(90,160,220,.85) 22%, rgba(20,80,140,.9) 55%, #041a30 100%),
+      radial-gradient(circle at 50% 120%, #2b6ca3 0%, #02101f 70%)
+  }
+  #desktop.show{opacity:1}
+  #desktop::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle at 50% 45%, rgba(255,255,255,.35) 0%, transparent 45%);
+    transition:opacity 1s;
+  }
+  #desktop .darkness{
+    position:absolute;inset:0;background:#000;opacity:0;
+    transition:opacity 1.5s ease;pointer-events:none;z-index:6
+  }
+  #desktop.glitching{animation:deskGlitch .1s infinite}
+  @keyframes deskGlitch{
+    0%{filter:none;transform:translate(0,0)}
+    20%{filter:invert(1) hue-rotate(90deg);transform:translate(-5px,3px) skewX(2deg)}
+    40%{filter:hue-rotate(180deg) contrast(2.2);transform:translate(4px,-4px) skewX(-3deg)}
+    60%{filter:invert(1) saturate(3.5);transform:translate(-3px,5px) skewX(1.5deg)}
+    80%{filter:hue-rotate(270deg) brightness(1.8) contrast(1.4);transform:translate(6px,-3px) skewX(-2deg)}
+    100%{filter:none;transform:translate(0,0)}
+  }
+  #desktop.shaking{animation:deskShake .07s infinite}
+  @keyframes deskShake{
+    0%{transform:translate(0,0)}25%{transform:translate(-14px,10px)}
+    50%{transform:translate(11px,-12px)}75%{transform:translate(-10px,-8px)}
+    100%{transform:translate(12px,11px)}
+  }
+  #desktop.flash-white{animation:flashWhite .08s}
+  @keyframes flashWhite{
+    0%{filter:invert(1) brightness(2)}
+    100%{filter:none}
+  }
+
+  .icons{position:absolute;top:18px;left:18px;display:grid;
+    grid-template-columns:repeat(1,92px);
+    grid-auto-flow:column;grid-template-rows:repeat(7,auto);
+    gap:6px 4px;z-index:5;
+    max-height:calc(100vh - 70px);
+  }
+  .icon{width:92px;padding:6px 4px;text-align:center;color:#fff;cursor:pointer;border-radius:4px;
+        text-shadow:1px 1px 3px rgba(0,0,0,.9);border:1px solid transparent;transition:background .12s}
+  .icon:hover{background:rgba(120,180,255,.32);border-color:rgba(180,220,255,.5)}
+  .icon .ic{font-size:34px;line-height:1;height:40px;display:flex;align-items:center;justify-content:center}
+  .icon .lbl{font-size:11px;margin-top:5px;line-height:1.15;word-break:break-word}
+
+  .folder-ic{width:36px;height:28px;background:linear-gradient(180deg,#ffd54f,#f9a825);
+    border-radius:3px;position:relative;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+  .folder-ic::before{content:'';position:absolute;top:-5px;left:2px;width:14px;height:7px;
+    background:#ffd54f;border-radius:3px 3px 0 0}
+  .file-ic{width:28px;height:36px;background:#fff;border-radius:2px;position:relative;
+    box-shadow:0 2px 4px rgba(0,0,0,.4);border:1px solid #bbb}
+  .file-ic::before{content:'';position:absolute;top:0;right:0;width:10px;height:10px;
+    background:linear-gradient(225deg,#ddd 50%,#fff 50%)}
+  .file-ic::after{content:'';position:absolute;top:14px;left:5px;right:5px;height:2px;
+    background:#4285f4;box-shadow:0 5px 0 #4285f4, 0 10px 0 #ccc}
+
+  .chrome-logo{width:36px;height:36px;border-radius:50%;position:relative;
+    background:conic-gradient(#ea4335 0 33%, #fbbc05 33% 66%, #34a853 66% 100%);
+    box-shadow:0 2px 6px rgba(0,0,0,.5)}
+  .chrome-logo::before{content:'';position:absolute;inset:20%;background:#fff;border-radius:50%;z-index:1}
+  .chrome-logo::after{content:'';position:absolute;inset:33%;background:#4285f4;border-radius:50%;z-index:2}
+
+  .icon.flickering{animation:iconFlicker .3s infinite}
+  @keyframes iconFlicker{
+    0%,100%{opacity:1;filter:none}
+    25%{opacity:.2;filter:invert(1) hue-rotate(90deg)}
+    50%{opacity:.9;filter:none}
+    75%{opacity:.4;filter:hue-rotate(180deg) saturate(3)}
+  }
+  .icon.eaten{visibility:hidden !important}
+
+  /* ============ РУКИ ============ */
+  .hand{
+    position:fixed;
+    width:90px;height:90px;
+    left:0;top:0;
+    z-index:8500;
+    pointer-events:none;
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.4) rotate(0deg);
+    filter:drop-shadow(0 0 14px rgba(255,40,40,.85)) drop-shadow(0 0 34px rgba(255,0,0,.5));
+    will-change:left, top, transform, opacity;
+  }
+  .hand svg{width:100%;height:100%;display:block;overflow:visible}
+
+  /* ============ КУЛАК (удар) ============ */
+  .fist-punch{
+    position:fixed;
+    width:200px;height:200px;
+    z-index:9450;
+    pointer-events:none;
+    opacity:0;
+    filter:drop-shadow(0 0 40px rgba(255,0,0,.95)) drop-shadow(0 0 100px rgba(255,0,0,.6));
+    will-change:left,top,transform,opacity;
+  }
+  .fist-punch svg{width:100%;height:100%;display:block;overflow:visible}
+
+  .shockwave{
+    position:fixed;
+    left:50%;top:50%;
+    width:40px;height:40px;
+    border-radius:50%;
+    border:10px solid rgba(255,80,80,.95);
+    box-shadow:0 0 60px rgba(255,0,0,.9), inset 0 0 40px rgba(255,0,0,.6);
+    transform:translate(-50%,-50%) scale(0);
+    z-index:9400;
+    pointer-events:none;
+    opacity:0;
+  }
+  .shockwave.go{animation:shockExpand .9s ease-out forwards}
+  @keyframes shockExpand{
+    0%{transform:translate(-50%,-50%) scale(0);opacity:1;border-width:24px}
+    100%{transform:translate(-50%,-50%) scale(28);opacity:0;border-width:2px}
+  }
+
+  .crack-overlay{
+    position:fixed;inset:0;
+    z-index:9350;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .3s;
+  }
+  .crack-overlay.show{opacity:1}
+  .crack-overlay svg{width:100%;height:100%;display:block}
+
+  .impact-text{
+    position:fixed;
+    left:50%;top:42%;
+    transform:translate(-50%,-50%) scale(0);
+    font-size:clamp(72px,15vw,180px);
+    font-weight:900;
+    color:#ff1a1a;
+    text-shadow:0 0 30px #ff0000, 0 0 80px #ff0000, 0 0 120px #900, 4px 4px 0 #000;
+    z-index:9500;
+    pointer-events:none;
+    font-family:'Impact','Arial Black',sans-serif;
+    letter-spacing:6px;
+    opacity:0;
+  }
+  .impact-text.go{animation:impactPop 1.6s ease-out forwards}
+  @keyframes impactPop{
+    0%{transform:translate(-50%,-50%) scale(0) rotate(-10deg);opacity:0}
+    12%{transform:translate(-50%,-50%) scale(1.5) rotate(-10deg);opacity:1}
+    28%{transform:translate(-50%,-50%) scale(1.05) rotate(-10deg);opacity:1}
+    75%{transform:translate(-50%,-50%) scale(1.05) rotate(-10deg);opacity:1}
+    100%{transform:translate(-50%,-50%) scale(1.25) rotate(-10deg);opacity:0}
+  }
+
+  /* ============ TASKBAR ============ */
+  #taskbar{
+    position:absolute;left:0;right:0;bottom:0;height:42px;z-index:800;
+    background:linear-gradient(180deg, rgba(30,60,100,.78) 0%, rgba(10,30,55,.92) 50%, rgba(5,18,35,.96) 100%);
+    border-top:1px solid rgba(140,200,255,.45);backdrop-filter:blur(9px);
+    display:flex;align-items:center;padding:0 8px;gap:10px;
+    box-shadow:0 -2px 12px rgba(0,0,0,.5)
+  }
+  #taskbar.flickering{animation:tbFlicker .25s infinite}
+  @keyframes tbFlicker{
+    0%,100%{filter:none;transform:translateY(0)}
+    20%{filter:invert(1) hue-rotate(90deg);transform:translateY(-4px)}
+    40%{filter:contrast(3) brightness(.5);transform:translateY(2px)}
+    60%{filter:hue-rotate(180deg) saturate(4);transform:translateY(-2px)}
+    80%{filter:invert(1) brightness(1.8);transform:translateY(4px)}
+  }
+  .start{width:36px;height:30px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+    color:#cfe8ff;font-size:20px;cursor:pointer;
+    background:radial-gradient(circle at 50% 35%, #6fb2e8, #1d4f80);
+    box-shadow:inset 0 0 8px rgba(255,255,255,.5), 0 0 6px rgba(80,180,255,.4)}
+  .start:hover{filter:brightness(1.25)}
+  .tasks{display:flex;gap:6px;flex:1;overflow:hidden}
+  .task-item{height:30px;padding:0 12px;border-radius:3px;color:#e8f4ff;font-size:12px;
+    display:flex;align-items:center;gap:6px;cursor:pointer;max-width:190px;white-space:nowrap;overflow:hidden;
+    background:rgba(90,150,215,.35);border:1px solid rgba(160,210,255,.35)}
+  .task-item:hover{background:rgba(120,180,240,.5)}
+  .tray{color:#dceeff;font-size:12.5px;padding-right:8px;text-shadow:0 1px 2px #000}
+  .task-item.eaten{
+    animation:taskEaten .9s forwards;pointer-events:none;
+  }
+  @keyframes taskEaten{
+    0%{ transform:scale(1); filter:none; opacity:1; }
+    20%{ filter:brightness(2.5) hue-rotate(-40deg); }
+    50%{ transform:scale(1.1) rotate(-3deg); filter:brightness(.3) blur(1px); }
+    100%{ transform:scale(0) rotate(20deg); filter:brightness(0) blur(5px); opacity:0; }
+  }
+
+  /* ============ WINDOWS ============ */
+  .window{
+    position:absolute;background:#f0f0f0;border-radius:7px 7px 0 0;z-index:100;
+    display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 18px 55px rgba(0,0,0,.65), 0 0 0 1px rgba(160,210,255,.55), inset 0 0 0 1px rgba(255,255,255,.5);
+    animation:winOpen .16s ease-out
+  }
+  @keyframes winOpen{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+  .titlebar{
+    height:30px;flex:0 0 30px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 0 0 10px;cursor:move;
+    background:linear-gradient(180deg, rgba(190,225,255,.95), rgba(120,175,230,.95) 48%, rgba(90,140,200,.95));
+    border-bottom:1px solid rgba(60,110,170,.7);
+    color:#062a4d;font-size:12.5px;font-weight:600;text-shadow:0 1px 0 rgba(255,255,255,.7)
+  }
+  .tb-btns{display:flex;height:100%}
+  .tb-btns span{width:42px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;font-weight:400}
+  .tb-btns span:hover{background:rgba(255,255,255,.55)}
+  .tb-btns .tb-close:hover{background:#e81123;color:#fff}
+
+  /* ============ CHROME ============ */
+  #chromeWin{left:50%;top:50%;transform:translate(-50%,-50%);width:min(940px,94vw);height:min(660px,84vh);background:#fff}
+  .chrome-tabs{height:36px;background:#dee1e6;display:flex;align-items:flex-end;padding:0 6px;gap:2px;flex:0 0 36px}
+  .chrome-tab{height:30px;background:#fff;border-radius:8px 8px 0 0;padding:0 18px;display:flex;align-items:center;
+    font-size:12.5px;color:#333;gap:8px;min-width:170px;box-shadow:0 -1px 3px rgba(0,0,0,.12)}
+  .chrome-tab::before{content:'●';color:#4caf50;font-size:9px}
+  .chrome-toolbar{height:44px;flex:0 0 44px;background:#fff;display:flex;align-items:center;gap:6px;padding:0 10px;
+    border-bottom:1px solid #dfe1e5}
+  .nav-btn{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    color:#5f6368;font-size:15px;cursor:pointer}
+  .nav-btn:hover{background:#f1f3f4}
+  .addr{flex:1;height:32px;border-radius:16px;border:1px solid #dfe1e5;background:#f1f3f4;padding:0 16px;
+    font-size:13.5px;color:#202124;outline:none;font-family:inherit}
+  .addr:focus{background:#fff;border-color:#1a73e8;box-shadow:0 1px 6px rgba(32,33,36,.28)}
+  .addr.pulse{animation:addrPulse 1.1s infinite}
+  @keyframes addrPulse{0%,100%{box-shadow:0 0 0 0 rgba(26,115,232,.7)}50%{box-shadow:0 0 0 6px rgba(26,115,232,0)}}
+  .chrome-content{flex:1;overflow:auto;background:#fff;position:relative}
+  .newtab{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;background:#fff}
+  .g-logo{font-size:64px;font-weight:700;letter-spacing:-3px;
+    background:linear-gradient(90deg,#4285f4 0 25%,#ea4335 25% 50%,#fbbc05 50% 75%,#34a853 75% 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .fake-search{width:min(560px,80%);height:44px;border-radius:22px;border:1px solid #dfe1e5;
+    display:flex;align-items:center;padding:0 20px;color:#9aa0a6;font-size:14px;box-shadow:0 1px 6px rgba(32,33,36,.1)}
+
+  /* ============ PIRATE SITE ============ */
+  .pirate{min-height:100%;background:#08080a;color:#c9ffc9;font-family:Verdana,Geneva,sans-serif;
+    text-align:center;padding:26px 18px 60px;position:relative;overflow:hidden}
+  .pirate::before{content:'';position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,255,0,.035) 0 1px, transparent 1px 3px)}
+  .pirate .head{color:#ffe600;font-size:13px;letter-spacing:3px;margin-bottom:16px;
+    border-bottom:1px dashed #2a2a2a;padding-bottom:12px}
+  .pirate h1{color:#ff2f2f;font-size:30px;margin:18px 0 6px;text-shadow:0 0 14px #ff0000,0 0 30px #900}
+  .pirate .sub{color:#8f8;font-size:13px;margin-bottom:20px}
+  .blink{animation:bl .7s steps(2,start) infinite}
+  @keyframes bl{to{visibility:hidden}}
+  .fake-stats{display:flex;gap:22px;justify-content:center;flex-wrap:wrap;color:#7fd67f;font-size:12px;margin:16px 0 22px}
+  .fake-stats b{color:#fff}
+  .btn-dl{
+    display:inline-block;padding:20px 62px;font-size:24px;font-weight:800;letter-spacing:2px;color:#04220b;
+    background:linear-gradient(180deg,#7dff8a,#12b62b);border:3px solid #0a5d17;border-radius:10px;cursor:pointer;
+    box-shadow:0 0 26px rgba(0,255,60,.7), inset 0 -5px 0 rgba(0,0,0,.25);
+    animation:pump 1.1s ease-in-out infinite;text-transform:uppercase;font-family:inherit
+  }
+  @keyframes pump{0%,100%{transform:scale(1)}50%{transform:scale(1.055)}}
+  .btn-dl:hover{filter:brightness(1.15)}
+  .comments{margin:34px auto 0;max-width:620px;text-align:left;font-size:12px;color:#6f6;line-height:1.9;
+    background:#0d0d10;border:1px solid #1e1e24;border-radius:6px;padding:14px 18px}
+  .comments .nm{color:#ffe600}
+  .comments .dt{color:#555}
+
+  /* ============ UTORRENT ============ */
+  #utorrentWin{width:min(760px,92vw);height:330px;left:auto;right:60px;bottom:70px;top:auto;background:#fff}
+  .ut-title{background:linear-gradient(180deg,#d7e6f5,#a9c6e4)!important;color:#123!important}
+  .ut-body{flex:1;display:flex;flex-direction:column;background:#fff;font-size:12px}
+  .ut-toolbar{height:34px;background:#e9eef5;border-bottom:1px solid #c8d4e2;display:flex;align-items:center;
+    padding:0 12px;gap:14px;color:#4a5b6e;font-size:11.5px}
+  .ut-toolbar span{opacity:.85}
+  .ut-head{display:grid;grid-template-columns:1fr 130px 110px 90px;gap:8px;padding:7px 12px;
+    background:#f4f7fb;border-bottom:1px solid #dbe4ee;color:#5a6b7d;font-size:11px;font-weight:700}
+  .ut-row{display:grid;grid-template-columns:1fr 130px 110px 90px;gap:8px;padding:10px 12px;align-items:center;
+    border-bottom:1px solid #eef2f7}
+  .ut-name{color:#1c2b3a;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ut-bar-wrap{height:14px;background:#e3e9f0;border:1px solid #c2cedd;border-radius:3px;overflow:hidden}
+  .ut-bar{height:100%;width:0%;background:linear-gradient(180deg,#8fe07a,#2ea82e);transition:width .12s linear}
+  .ut-pct{color:#2a6b2a;font-weight:700;text-align:right}
+  .ut-status{color:#6b7b8c;font-size:11px}
+  .ut-bottom{margin-top:auto;height:52px;background:#f4f7fb;border-top:1px solid #dbe4ee;display:flex;
+    align-items:center;padding:0 14px;color:#3d4d5e;font-size:11.5px;gap:8px}
+  .ut-bottom b{color:#1c2b3a}
+
+  /* ============ HINT ============ */
+  #hint{
+    position:absolute;left:50%;bottom:58px;transform:translateX(-50%);z-index:900;
+    max-width:min(720px,92vw);display:flex;align-items:center;gap:12px;
+    background:rgba(8,16,28,.86);border:2px solid #ffd93d;border-radius:10px;
+    padding:12px 20px;color:#fff3c4;font-size:14.5px;line-height:1.4;
+    box-shadow:0 0 26px rgba(255,217,61,.35), 0 10px 30px rgba(0,0,0,.6);
+    backdrop-filter:blur(4px);opacity:0;transition:opacity .3s
+  }
+  #hint.show{opacity:1}
+  #hint .bulb{font-size:20px;filter:drop-shadow(0 0 8px #ffd93d);animation:bulbP 1.4s ease-in-out infinite}
+  @keyframes bulbP{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+
+  /* ============ КРОВАВЫЙ ТИНТ (ярость) ============ */
+  body.rage::before{
+    content:'';position:fixed;inset:0;z-index:8999;pointer-events:none;
+    background:
+      radial-gradient(circle at 72% 40%, rgba(255,30,30,.45) 0%, rgba(140,0,0,.25) 35%, transparent 70%),
+      radial-gradient(circle at 50% 100%, rgba(255,0,0,.25) 0%, transparent 60%);
+    animation:rageTint .18s infinite alternate;
+    mix-blend-mode:screen
+  }
+  @keyframes rageTint{0%{opacity:.7}100%{opacity:1}}
+
+  /* ============ OMEGA FLOWEY ============ */
+  #virusOverlay{
+    position:fixed;inset:0;z-index:9000;
+    display:block;
+    opacity:0;pointer-events:none;transition:opacity .9s ease;overflow:hidden;
+    background:transparent
+  }
+  #virusOverlay.show{opacity:1;pointer-events:auto}
+
+  #omegaFlowey{
+    position:absolute;
+    right:0; top:0;
+    width:min(78vw,720px);
+    height:min(78vh,720px);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;
+    transition:opacity 1.8s ease, transform .5s ease;
+    transform:scale(0.55);
+    transform-origin:center center;
+    will-change:transform;
+    filter:drop-shadow(0 0 40px rgba(0,0,0,.9))
+  }
+  #omegaFlowey.show{opacity:1;transform:scale(0.72)}
+
+  #omegaFlowey.beat{animation:omegaBeat .16s ease-out}
+  @keyframes omegaBeat{
+    0%{filter:brightness(1)}
+    50%{filter:brightness(1.8) drop-shadow(0 0 50px rgba(255,60,60,.9))}
+    100%{filter:brightness(1)}
+  }
+
+  /* РЕЖИМ ЯРОСТИ */
+  #omegaFlowey.rage{
+    filter:brightness(1.7) saturate(2.4) hue-rotate(-15deg)
+           drop-shadow(0 0 40px rgba(255,0,0,.95))
+           drop-shadow(0 0 90px rgba(255,0,0,.6));
+    animation:rageShake .055s infinite !important;
+  }
+  @keyframes rageShake{
+    0%  {transform:scale(.72) translate(0,0) rotate(0deg)}
+    25% {transform:scale(.75) translate(-7px,4px) rotate(-1.5deg)}
+    50% {transform:scale(.72) translate(6px,-5px) rotate(1.5deg)}
+    75% {transform:scale(.74) translate(-4px,-3px) rotate(-1deg)}
+    100%{transform:scale(.72) translate(5px,5px) rotate(0deg)}
+  }
+  #omegaFlowey.rage .eye{
+    box-shadow:0 0 40px rgba(255,50,50,.95), inset 0 0 20px rgba(0,0,0,.5);
+  }
+  #omegaFlowey.rage .eye .pupil.red{
+    background:#ff0000;
+    box-shadow:0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 100px #ff0000;
+  }
+  #omegaFlowey.rage .mouth-inner{
+    box-shadow:0 0 70px rgba(255,0,0,.95), inset 0 0 80px rgba(255,0,0,.6);
+    border-color:#ff0000;
+  }
+  #omegaFlowey.rage .tooth, #omegaFlowey.rage .tooth-b{
+    filter:drop-shadow(0 0 8px #ff2222);
+  }
+
+  .tentacle{position:absolute;background:#1a1a1a;border-radius:40% 40% 20% 20%;
+    box-shadow:inset 0 0 20px rgba(80,80,80,.8)}
+  .tentacle.left{
+    width:110px;height:250px;left:2%;top:10%;transform-origin:top center;
+    background:radial-gradient(ellipse at 50% 20%, #3a3a3a, #0a0a0a);
+    animation:swayLeft 3.2s ease-in-out infinite
+  }
+  .tentacle.right{
+    width:110px;height:250px;right:2%;top:10%;transform-origin:top center;
+    background:radial-gradient(ellipse at 50% 20%, #3a3a3a, #0a0a0a);
+    animation:swayRight 3.2s ease-in-out infinite
+  }
+  @keyframes swayLeft{0%,100%{transform:rotate(-8deg) scaleY(1)}50%{transform:rotate(6deg) scaleY(1.06)}}
+  @keyframes swayRight{0%,100%{transform:rotate(8deg) scaleY(1)}50%{transform:rotate(-6deg) scaleY(1.06)}}
+
+  .tentacle.top-left{
+    width:80px;height:160px;left:12%;top:-2%;
+    transform:rotate(35deg);transform-origin:bottom center;
+    animation:swayTL 2.6s ease-in-out infinite
+  }
+  .tentacle.top-right{
+    width:80px;height:160px;right:12%;top:-2%;
+    transform:rotate(-35deg);transform-origin:bottom center;
+    animation:swayTR 2.6s ease-in-out infinite
+  }
+  @keyframes swayTL{0%,100%{transform:rotate(30deg)}50%{transform:rotate(42deg)}}
+  @keyframes swayTR{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(-42deg)}}
+
+  .tv-frame{
+    position:absolute;top:4%;left:50%;transform:translateX(-50%);
+    width:min(300px,38vmin);aspect-ratio:1.25;
+    background:linear-gradient(160deg,#2a2a2a,#111);
+    border-radius:12px;border:6px solid #3a3a3a;
+    box-shadow:0 0 40px rgba(0,0,0,.9), inset 0 0 30px rgba(0,0,0,.8);
+    display:flex;align-items:center;justify-content:center;z-index:5
+  }
+  .tv-screen{
+    width:88%;height:82%;background:#000;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+    box-shadow:inset 0 0 30px rgba(255,255,255,.15)
+  }
+  .tv-face{
+    width:90%;height:90%;display:flex;align-items:center;justify-content:center;
+    animation:tvFlicker 4s steps(1) infinite
+  }
+  @keyframes tvFlicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:.3}94%{opacity:1}97%{opacity:.5}98%{opacity:1}}
+
+  .eye{position:absolute;border-radius:50%;background:#f5ecd8;
+    box-shadow:0 0 20px rgba(255,255,255,.3), inset 0 0 10px rgba(0,0,0,.3);overflow:hidden;
+    transition:box-shadow .3s}
+  .eye .pupil{
+    position:absolute;width:42%;height:42%;background:#000;border-radius:50%;
+    top:28%;left:28%;transition:all .3s
+  }
+  .eye .pupil.red{background:#ff0000;box-shadow:0 0 16px #ff0000}
+  .eye.top-left{width:70px;height:70px;top:14%;left:16%}
+  .eye.top-right{width:70px;height:70px;top:14%;right:16%}
+  .eye.mid-left{width:60px;height:60px;top:36%;left:8%}
+  .eye.mid-right{width:60px;height:60px;top:36%;right:8%}
+
+  .branch{
+    position:absolute;background:linear-gradient(90deg,#1f6b1f,#4caf50,#2e7d32);
+    border-radius:40px;box-shadow:0 6px 20px rgba(0,0,0,.7), inset 0 -4px 10px rgba(0,0,0,.4);
+    z-index:2
+  }
+  .branch.left{
+    width:38%;height:50px;left:-4%;top:50%;transform-origin:right center;
+    animation:branchL 3.8s ease-in-out infinite
+  }
+  .branch.right{
+    width:38%;height:50px;right:-4%;top:50%;transform-origin:left center;
+    animation:branchR 3.8s ease-in-out infinite
+  }
+  @keyframes branchL{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-8px)}}
+  @keyframes branchR{0%,100%{transform:rotate(4deg) translateY(0)}50%{transform:rotate(-4deg) translateY(-8px)}}
+
+  .thorn{position:absolute;width:0;height:0;border-left:8px solid transparent;
+    border-right:8px solid transparent;border-bottom:18px solid #d32f2f}
+
+  .mouth{
+    position:absolute;bottom:6%;left:50%;transform:translateX(-50%);
+    width:min(400px,52vmin);height:min(190px,24vmin);
+    z-index:6
+  }
+  .mouth-inner{
+    width:100%;height:100%;background:#0a0a0a;border-radius:50% 50% 45% 45%;
+    border:6px solid #8b0000;overflow:hidden;position:relative;
+    box-shadow:0 0 30px rgba(255,0,0,.4), inset 0 0 40px rgba(0,0,0,.9);
+    transition:box-shadow .3s, border-color .3s
+  }
+  .teeth{position:absolute;top:0;left:0;right:0;height:38%;display:flex;justify-content:space-around;align-items:flex-start}
+  .tooth{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;
+    border-top:30px solid #e8e0c8;filter:drop-shadow(0 2px 4px rgba(0,0,0,.8))}
+  .teeth-bottom{position:absolute;bottom:0;left:0;right:0;height:38%;display:flex;justify-content:space-around;align-items:flex-end}
+  .tooth-b{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;
+    border-bottom:30px solid #e8e0c8;filter:drop-shadow(0 -2px 4px rgba(0,0,0,.8))}
+
+  /* ============ DIALOG ============ */
+  #dialogBox{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+    width:min(780px,92vw);min-height:126px;
+    background:#000;border:4px solid #fff;border-radius:8px;padding:20px 26px;
+    color:#fff;font-family:'Courier New',monospace;font-size:clamp(15px,2.2vw,21px);line-height:1.55;
+    box-shadow:0 0 40px rgba(255,255,255,.15), 0 0 80px rgba(0,0,0,.9);
+    z-index:9600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .4s, box-shadow .3s, border-color .3s
+  }
+  #dialogBox.visible{opacity:1;pointer-events:auto}
+  #dialogBox.rage{
+    border-color:#ff2222;
+    box-shadow:0 0 60px rgba(255,0,0,.7), 0 0 120px rgba(255,0,0,.3);
+  }
+  #dialogText{white-space:pre-wrap}
+  .cursor{display:inline-block;width:11px;height:1em;background:#fff;vertical-align:-2px;animation:bl .5s steps(2,start) infinite}
+
+  #redFlash{position:fixed;inset:0;background:#f00;z-index:9999;opacity:0;pointer-events:none;transition:opacity .1s}
+
+  body.shake{animation:bodyShake .07s infinite}
+  @keyframes bodyShake{
+    0%{transform:translate(0,0)}25%{transform:translate(-9px,6px)}
+    50%{transform:translate(7px,-8px)}75%{transform:translate(-6px,-5px)}100%{transform:translate(8px,7px)}
+  }
+
+  #theEnd{
+    position:fixed;inset:0;z-index:11000;background:#05070c;color:#e8f4ff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;
+    padding:30px;opacity:0;pointer-events:none;transition:opacity .6s
+  }
+  #theEnd.show{opacity:1;pointer-events:auto}
+  #theEnd h2{font-size:clamp(24px,4vw,42px);margin:0;color:#7dff8a;text-shadow:0 0 22px rgba(120,255,140,.5)}
+  #theEnd p{max-width:640px;line-height:1.65;color:#a9c3d8;font-size:15px;margin:0}
+  #theEnd button{
+    margin-top:8px;padding:14px 42px;font-size:17px;font-weight:700;font-family:inherit;cursor:pointer;
+    border-radius:10px;border:2px solid #7dff8a;background:transparent;color:#7dff8a;transition:.18s
+  }
+  #theEnd button:hover{background:#7dff8a;color:#04120a;box-shadow:0 0 28px rgba(125,255,138,.6)}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="handLeft" class="hand"></div>
+<div id="handRight" class="hand"></div>
+
+<div id="splash">
+  <div class="warning" id="splashWarning">⚠ НЕ ДЛЯ ЭПИЛЕПТИКОВ ⚠</div>
+  <img id="splashLogo"
+       src="https://static-algoritmika-org.ngcdn.ru/uploads/community/avatar/svg/70492408_1789827889.svg?t=1789827889"
+       alt="by Всеволод" referrerpolicy="no-referrer">
+  <div class="label" id="splashLabel">by <b>Всеволод</b></div>
+  <div class="bar" id="splashBar"><i></i></div>
+  <div class="sub" id="splashSub">POWERED BY PYTHON · ALGOSMS</div>
+  <div class="unity-mark" id="splashUnity">Made with Unity</div>
+</div>
+
+<div id="desktop">
+  <div class="darkness" id="darknessLayer"></div>
+  <div class="icons" id="iconsBox">
+    <div class="icon" data-app="pc"><div class="ic">🖥️</div><div class="lbl">Компьютер</div></div>
+    <div class="icon" data-app="bin"><div class="ic">🗑️</div><div class="lbl">Корзина</div></div>
+    <div class="icon" data-app="chrome"><div class="ic"><div class="chrome-logo"></div></div><div class="lbl">Google Chrome</div></div>
+    <div class="icon" data-app="docs"><div class="ic"><div class="folder-ic"></div></div><div class="lbl">Документы</div></div>
+    <div class="icon" data-app="music"><div class="ic"><div class="folder-ic"></div></div><div class="lbl">Музыка</div></div>
+    <div class="icon" data-app="pics"><div class="ic"><div class="folder-ic"></div></div><div class="lbl">Изображения</div></div>
+    <div class="icon" data-app="video"><div class="ic"><div class="folder-ic"></div></div><div class="lbl">Видео</div></div>
+    <div class="icon" data-app="games"><div class="ic"><div class="folder-ic"></div></div><div class="lbl">Игры</div></div>
+    <div class="icon" data-app="file1"><div class="ic"><div class="file-ic"></div></div><div class="lbl">Отчёт.docx</div></div>
+    <div class="icon" data-app="file2"><div class="ic"><div class="file-ic"></div></div><div class="lbl">Пароли.txt</div></div>
+    <div class="icon" data-app="file3"><div class="ic"><div class="file-ic"></div></div><div class="lbl">Фото.jpg</div></div>
+    <div class="icon" data-app="net"><div class="ic">🌐</div><div class="lbl">Сеть</div></div>
+    <div class="icon" data-app="panel"><div class="ic">⚙️</div><div class="lbl">Панель управления</div></div>
+    <div class="icon" data-app="down"><div class="ic"><div class="folder-ic"></div></div><div class="lbl">Загрузки</div></div>
+  </div>
+  <div id="taskbar">
+    <div class="start">⊞</div>
+    <div class="tasks" id="tasks"></div>
+    <div class="tray"><span id="clock">--:--</span></div>
+  </div>
+</div>
+
+<div id="hint"><span class="bulb">💡</span><span id="hintText"></span></div>
+
+<div id="redFlash"></div>
+
+<div id="crackOverlay" class="crack-overlay"></div>
+
+<div id="virusOverlay">
+  <div id="omegaFlowey">
+    <div class="tentacle left"></div>
+    <div class="tentacle right"></div>
+    <div class="tentacle top-left"></div>
+    <div class="tentacle top-right"></div>
+
+    <div class="branch left">
+      <div class="thorn" style="left:20%;top:-18px;transform:rotate(-20deg)"></div>
+      <div class="thorn" style="left:55%;top:36px;transform:rotate(160deg)"></div>
+      <div class="thorn" style="left:80%;top:-14px;transform:rotate(-30deg)"></div>
+    </div>
+    <div class="branch right">
+      <div class="thorn" style="right:20%;top:-18px;transform:rotate(20deg)"></div>
+      <div class="thorn" style="right:55%;top:36px;transform:rotate(-160deg)"></div>
+      <div class="thorn" style="right:80%;top:-14px;transform:rotate(30deg)"></div>
+    </div>
+
+    <div class="eye top-left"><div class="pupil red"></div></div>
+    <div class="eye top-right"><div class="pupil red"></div></div>
+    <div class="eye mid-left"><div class="pupil red"></div></div>
+    <div class="eye mid-right"><div class="pupil red"></div></div>
+
+    <div class="tv-frame">
+      <div class="tv-screen">
+        <div class="tv-face" id="tvFace"></div>
+      </div>
+    </div>
+
+    <div class="mouth">
+      <div class="mouth-inner">
+        <div class="teeth">
+          <div class="tooth"></div><div class="tooth"></div><div class="tooth"></div>
+          <div class="tooth"></div><div class="tooth"></div><div class="tooth"></div>
+          <div class="tooth"></div><div class="tooth"></div>
+        </div>
+        <div class="teeth-bottom">
+          <div class="tooth-b"></div><div class="tooth-b"></div><div class="tooth-b"></div>
+          <div class="tooth-b"></div><div class="tooth-b"></div><div class="tooth-b"></div>
+          <div class="tooth-b"></div><div class="tooth-b"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="dialogBox"><span id="dialogText"></span><span class="cursor"></span></div>
+
+<div id="theEnd">
+  <h2>🎉 ЭТО БЫЛА ШУТКА!</h2>
+  <p>Никакого вируса нет. Это просто страница-прикол, сделанная на HTML, CSS и JavaScript.
+     Твои файлы в порядке, твой компьютер в порядке, а ГТА 6 всё ещё не вышла.</p>
+  <p style="color:#ffd93d">Мораль: не качай пиратку с подозрительных сайтов 😉</p>
+  <button onclick="location.reload()">Начать заново</button>
+</div>
+
+<script>
+/* =========================================================
+   УТИЛИТЫ
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* =========================================================
+   ЗВУК
+   ========================================================= */
+let actx = null;
+function initAudio(){
+  if(!actx){
+    try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){}
+  }
+  if(actx && actx.state === 'suspended') actx.resume();
+}
+function blip(freq, dur, type, vol){
+  if(!actx) return;
+  const t = actx.currentTime;
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = type || 'square';
+  o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(vol || 0.06, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + (dur || 0.05));
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + (dur || 0.05) + 0.02);
+}
+function clickSound(){
+  if(!actx) return;
+  const t = actx.currentTime;
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = 'square';
+  o.frequency.setValueAtTime(1000, t);
+  o.frequency.exponentialRampToValueAtTime(400, t + 0.03);
+  g.gain.setValueAtTime(0.08, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + 0.05);
+}
+function crunchSound(){
+  if(!actx) return;
+  const t = actx.currentTime;
+  const isRage = document.body.classList.contains('rage');
+  const mult = isRage ? 1.9 : 1;
+  const o = actx.createOscillator();
+  const o2 = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(120, t);
+  o.frequency.exponentialRampToValueAtTime(40, t + 0.25);
+  o2.type = 'square';
+  o2.frequency.setValueAtTime(80, t);
+  o2.frequency.exponentialRampToValueAtTime(30, t + 0.25);
+  g.gain.setValueAtTime(0.12 * mult, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+  o.connect(g); o2.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + 0.3);
+  o2.start(t); o2.stop(t + 0.3);
+}
+function rageScream(){
+  if(!actx) return;
+  const t = actx.currentTime;
+  // Низкий рёв — громче
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(220, t);
+  o.frequency.exponentialRampToValueAtTime(45, t + 0.7);
+  g.gain.setValueAtTime(0.42, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.75);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + 0.8);
+  // Верхний визг — громче
+  const o2 = actx.createOscillator();
+  const g2 = actx.createGain();
+  o2.type = 'square';
+  o2.frequency.setValueAtTime(1400, t);
+  o2.frequency.exponentialRampToValueAtTime(300, t + 0.65);
+  g2.gain.setValueAtTime(0.22, t);
+  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+  o2.connect(g2); g2.connect(actx.destination);
+  o2.start(t); o2.stop(t + 0.75);
+  // Доп. слой — низкий гул
+  const o3 = actx.createOscillator();
+  const g3 = actx.createGain();
+  o3.type = 'triangle';
+  o3.frequency.setValueAtTime(70, t);
+  o3.frequency.exponentialRampToValueAtTime(28, t + 0.9);
+  g3.gain.setValueAtTime(0.3, t);
+  g3.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
+  o3.connect(g3); g3.connect(actx.destination);
+  o3.start(t); o3.stop(t + 1.0);
+}
+function boomSound(){
+  if(!actx) return;
+  const t = actx.currentTime;
+  // Низкий бас — сердце удара
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(110, t);
+  o.frequency.exponentialRampToValueAtTime(22, t + 1.0);
+  g.gain.setValueAtTime(0.95, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + 1.15);
+
+  // Шумовой удар (буфер)
+  try{
+    const dur = 0.45;
+    const buf = actx.createBuffer(1, Math.floor(actx.sampleRate * dur), actx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i = 0; i < data.length; i++){
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / data.length, 2);
+    }
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    const g2 = actx.createGain();
+    g2.gain.setValueAtTime(0.55, t);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(g2); g2.connect(actx.destination);
+    src.start(t);
+  }catch(e){}
+
+  // Скрежет металла
+  const o3 = actx.createOscillator();
+  const g3 = actx.createGain();
+  o3.type = 'sawtooth';
+  o3.frequency.setValueAtTime(220, t);
+  o3.frequency.exponentialRampToValueAtTime(45, t + 0.55);
+  g3.gain.setValueAtTime(0.32, t);
+  g3.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+  o3.connect(g3); g3.connect(actx.destination);
+  o3.start(t); o3.stop(t + 0.65);
+}
+
+/* =========================================================
+   МУЗЫКА
+   ========================================================= */
+const splashSong = new Audio('https://apostol-space.tech/uploads/be8214febf43a04bc289bc558796754d_f9ef29efc042e46505a06b592f3987ad.mp3');
+splashSong.volume = 0.5;
+splashSong.preload = 'auto';
+
+const virusSong = new Audio('https://dl3s4.muzofond.fm/aHR0cDovL2YubXAzcG9pc2submV0L21wMy8wMDIvODk2LzI1MC8yODk2MjUwLm1wMw==');
+virusSong.loop = true;
+virusSong.volume = 0.05;
+virusSong.preload = 'auto';
+
+/* =========================================================
+   SVG РУКИ И КУЛАКА
+   ========================================================= */
+function handSVG(){
+  return `
+  <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="handG" cx="50%" cy="70%" r="65%">
+        <stop offset="0%"  stop-color="#3d3d3d"/>
+        <stop offset="55%" stop-color="#1c1c1c"/>
+        <stop offset="100%" stop-color="#050505"/>
+      </radialGradient>
+      <radialGradient id="tipG" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"  stop-color="#ff2a2a"/>
+        <stop offset="70%" stop-color="#a80000"/>
+        <stop offset="100%" stop-color="#3a0000"/>
+      </radialGradient>
+    </defs>
+    <path d="M60 118 Q42 95 38 70 Q34 48 44 32 Q52 22 60 22 Q68 22 76 32 Q86 48 82 70 Q78 95 60 118 Z"
+          fill="url(#handG)" stroke="#050505" stroke-width="2"/>
+    <path d="M42 38 Q32 22 26 8 Q24 2 30 6 Q42 20 48 34 Z" fill="#141414" stroke="#050505" stroke-width="1.5"/>
+    <path d="M60 26 Q58 12 60 0 Q62 12 60 26 Z" fill="#141414" stroke="#050505" stroke-width="1.5"/>
+    <path d="M78 38 Q88 22 94 8 Q96 2 90 6 Q78 20 72 34 Z" fill="#141414" stroke="#050505" stroke-width="1.5"/>
+    <circle cx="27" cy="7" r="5" fill="url(#tipG)"/>
+    <circle cx="60" cy="3" r="5" fill="url(#tipG)"/>
+    <circle cx="93" cy="7" r="5" fill="url(#tipG)"/>
+    <ellipse cx="60" cy="80" rx="14" ry="18" fill="#8a2c2c" opacity=".55"/>
+  </svg>`;
+}
+
+function fistSVG(){
+  return `
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="fistG" cx="45%" cy="60%" r="65%">
+        <stop offset="0%" stop-color="#5a1a1a"/>
+        <stop offset="55%" stop-color="#2a0a0a"/>
+        <stop offset="100%" stop-color="#050000"/>
+      </radialGradient>
+      <radialGradient id="knuckleG" cx="50%" cy="40%" r="50%">
+        <stop offset="0%" stop-color="#ff3030"/>
+        <stop offset="70%" stop-color="#8a0000"/>
+        <stop offset="100%" stop-color="#2a0000"/>
+      </radialGradient>
+    </defs>
+    <!-- Рука/запястье -->
+    <path d="M62 198 Q56 170 60 138 L140 138 Q144 170 138 198 Z" fill="#1a0505" stroke="#000" stroke-width="3"/>
+    <!-- Кулак -->
+    <ellipse cx="100" cy="95" rx="70" ry="62" fill="url(#fistG)" stroke="#000" stroke-width="4"/>
+    <!-- Костяшки -->
+    <ellipse cx="52" cy="66" rx="17" ry="19" fill="url(#knuckleG)" stroke="#000" stroke-width="2"/>
+    <ellipse cx="84" cy="52" rx="18" ry="20" fill="url(#knuckleG)" stroke="#000" stroke-width="2"/>
+    <ellipse cx="116" cy="52" rx="18" ry="20" fill="url(#knuckleG)" stroke="#000" stroke-width="2"/>
+    <ellipse cx="148" cy="66" rx="17" ry="19" fill="url(#knuckleG)" stroke="#000" stroke-width="2"/>
+    <!-- Большой палец -->
+    <ellipse cx="40" cy="108" rx="22" ry="17" fill="url(#fistG)" stroke="#000" stroke-width="3"/>
+    <!-- Детали -->
+    <path d="M58 82 Q100 102 142 82" stroke="#000" stroke-width="2" fill="none" opacity=".55"/>
+    <path d="M68 112 Q100 134 132 112" stroke="#000" stroke-width="2" fill="none" opacity=".55"/>
+    <path d="M78 138 Q100 148 122 138" stroke="#000" stroke-width="2" fill="none" opacity=".4"/>
+  </svg>`;
+}
+
+function crackSVG(){
+  return `
+  <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="crackGlow">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <g stroke="#000" stroke-width="4" fill="none" filter="url(#crackGlow)" opacity=".95" stroke-linecap="round">
+      <path d="M500,500 L300,200 L250,80 L230,0"/>
+      <path d="M500,500 L750,180 L820,60 L860,0"/>
+      <path d="M500,500 L180,420 L60,380 L0,370"/>
+      <path d="M500,500 L850,520 L960,560 L1000,575"/>
+      <path d="M500,500 L420,800 L380,960 L375,1000"/>
+      <path d="M500,500 L620,750 L700,930 L720,1000"/>
+      <path d="M500,500 L360,340 L280,260 L220,180"/>
+      <path d="M500,500 L640,360 L700,280 L760,200"/>
+      <path d="M500,500 L340,620 L240,720 L160,820"/>
+      <path d="M500,500 L660,640 L780,760 L860,880"/>
+      <path d="M400,380 L320,360 L260,420 L200,400"/>
+      <path d="M600,380 L690,350 L760,410 L820,380"/>
+      <path d="M420,600 L340,660 L300,740"/>
+      <path d="M580,620 L670,680 L730,770"/>
+      <path d="M320,500 L240,500 L180,520"/>
+      <path d="M680,500 L760,500 L820,480"/>
+    </g>
+    <g stroke="#ff2222" stroke-width="1.6" fill="none" opacity=".85" stroke-linecap="round">
+      <path d="M500,500 L300,200 L250,80"/>
+      <path d="M500,500 L750,180 L820,60"/>
+      <path d="M500,500 L180,420 L60,380"/>
+      <path d="M500,500 L850,520 L960,560"/>
+      <path d="M500,500 L420,800 L380,960"/>
+      <path d="M500,500 L620,750 L700,930"/>
+      <path d="M500,500 L360,340 L280,260"/>
+      <path d="M500,500 L640,360 L700,280"/>
+    </g>
+    <g fill="#ff3030" opacity=".9">
+      <circle cx="500" cy="500" r="22" filter="url(#crackGlow)"/>
+      <circle cx="500" cy="500" r="40" fill="none" stroke="#ff2222" stroke-width="3" opacity=".7"/>
+    </g>
+  </svg>`;
+}
+
+/* =========================================================
+   UNITY SPLASH
+   ========================================================= */
+async function runSplash(){
+  const canvas = document.getElementById('game');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+
+  function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = [];
+  for(let i = 0; i < 90; i++){
+    particles.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      r: 0.6 + Math.random() * 1.8, a: 0.06 + Math.random() * 0.35, s: 0.15 + Math.random() * 0.55
+    });
+  }
+
+  let wavePhase = 0, rafId;
+  function draw(){
+    const w = canvas.width, h = canvas.height;
+    const cx = w / 2, cy = h / 2;
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.55);
+    const pulse = 0.14 + 0.05 * Math.sin(wavePhase);
+    grd.addColorStop(0, 'rgba(90,150,255,' + pulse + ')');
+    grd.addColorStop(0.45, 'rgba(30,70,160,' + (pulse * 0.35) + ')');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, w, h);
+
+    for(const p of particles){
+      const dx = cx - p.x, dy = cy - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) + 0.01;
+      p.x += (dx / dist) * p.s * 2.4;
+      p.y += (dy / dist) * p.s * 2.4;
+      if(dist < 24){ p.x = Math.random() * w; p.y = Math.random() * h; }
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(160,205,255,' + p.a + ')';
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    wavePhase += 0.045;
+    rafId = requestAnimationFrame(draw);
+  }
+  draw();
+
+  splashSong.play().catch(() => {
+    const resume = () => { splashSong.play().catch(()=>{}); document.removeEventListener('click', resume); };
+    document.addEventListener('click', resume, { once: true });
+  });
+
+  setTimeout(() => $('#splashWarning').classList.add('in'), 400);
+
+  await sleep(180);
+  $('#splashLogo').classList.add('in');
+  setTimeout(() => $('#splashLabel').classList.add('in'), 550);
+  setTimeout(() => $('#splashBar').classList.add('in'),   800);
+  setTimeout(() => $('#splashSub').classList.add('in'),   900);
+  setTimeout(() => $('#splashUnity').classList.add('in'), 1100);
+
+  const barFill = document.querySelector('#splashBar i');
+  const DURATION = 3000;
+  const start = performance.now();
+  await new Promise(resolve => {
+    function step(now){
+      const p = Math.min((now - start) / DURATION, 1);
+      barFill.style.width = (p * 100).toFixed(1) + '%';
+      if(p < 1) requestAnimationFrame(step); else resolve();
+    }
+    requestAnimationFrame(step);
+  });
+
+  await sleep(280);
+  const splash = $('#splash');
+  splash.classList.add('hide');
+  await sleep(500);
+  cancelAnimationFrame(rafId);
+
+  try{
+    const fadeOut = setInterval(() => {
+      splashSong.volume = Math.max(0, splashSong.volume - 0.04);
+      if(splashSong.volume <= 0.01){ clearInterval(fadeOut); splashSong.pause(); }
+    }, 80);
+  }catch(e){}
+
+  splash.style.display = 'none';
+  canvas.style.display = 'none';
+  $('#desktop').classList.add('show');
+  await sleep(900);
+  startDesktopScene();
+}
+
+/* =========================================================
+   ПОДСКАЗКИ
+   ========================================================= */
+const hintEl  = $('#hint');
+const hintTxt = $('#hintText');
+let hintTimeout = null;
+function setHint(text){
+  clearTimeout(hintTimeout);
+  hintEl.classList.add('show');
+  hintTxt.textContent = '';
+  let i = 0;
+  (function type(){
+    if(i < text.length){ hintTxt.textContent += text[i++]; hintTimeout = setTimeout(type, 16); }
+  })();
+}
+function hideHint(){ hintEl.classList.remove('show'); }
+
+/* =========================================================
+   ЧАСЫ
+   ========================================================= */
+function tickClock(){
+  const d = new Date();
+  $('#clock').textContent =
+    String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 15000);
+
+/* =========================================================
+   ПЕРЕТАСКИВАНИЕ
+   ========================================================= */
+function makeDraggable(win){
+  const tb = win.querySelector('.titlebar');
+  if(!tb) return;
+  let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  tb.addEventListener('mousedown', e => {
+    if(e.target.closest('.tb-btns')) return;
+    const r = win.getBoundingClientRect();
+    win.style.transform = 'none';
+    win.style.left = r.left + 'px'; win.style.top = r.top + 'px';
+    win.style.width = r.width + 'px'; win.style.height = r.height + 'px';
+    win.style.right = 'auto'; win.style.bottom = 'auto';
+    dragging = true; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+    e.preventDefault();
+  });
+  function move(e){
+    if(!dragging) return;
+    win.style.left = (ox + e.clientX - sx) + 'px';
+    win.style.top  = (oy + e.clientY - sy) + 'px';
+  }
+  function up(){
+    dragging = false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+  }
+}
+
+/* =========================================================
+   TV-ЛИЦО
+   ========================================================= */
+function tvFaceSVG(){
+  return `
+  <svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+    <rect width="400" height="320" fill="#000"/>
+    <ellipse cx="130" cy="120" rx="38" ry="48" fill="#fff"/>
+    <ellipse cx="270" cy="120" rx="38" ry="48" fill="#fff"/>
+    <circle cx="130" cy="126" r="16" fill="#ff0000">
+      <animate attributeName="r" values="16;20;16" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="270" cy="126" r="16" fill="#ff0000">
+      <animate attributeName="r" values="16;20;16" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="130" cy="126" r="6" fill="#000"/>
+    <circle cx="270" cy="126" r="6" fill="#000"/>
+    <path d="M100 200 Q200 290 300 200" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M120 205 L140 235 L160 207 L180 237 L200 209 L220 237 L240 207 L260 235 L280 205"
+          fill="#fff" stroke="#000" stroke-width="3" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+/* =========================================================
+   ЗАДАЧИ
+   ========================================================= */
+function addTask(name, winId){
+  const el = document.createElement('div');
+  el.className = 'task-item';
+  el.textContent = name;
+  el.onclick = () => {
+    clickSound();
+    const w = document.getElementById(winId);
+    if(w) w.style.display = (w.style.display === 'none' ? 'flex' : 'none');
+  };
+  $('#tasks').appendChild(el);
+}
+
+/* =========================================================
+   ЭТАП 1 — РАБОЧИЙ СТОЛ
+   ========================================================= */
+let chromeOpened = false;
+function startDesktopScene(){
+  setHint('Может поиграть в ГТА 6? Хм, для этого нужно зайти в Chrome (он на рабочем столе) и скачать.');
+  $$('.icon').forEach(icon => {
+    icon.addEventListener('click', () => {
+      initAudio();
+      clickSound();
+      const app = icon.dataset.app;
+      if(app === 'chrome'){
+        if(!chromeOpened) openChrome();
+        else { const w = $('#chromeWin'); if(w) w.style.display = 'flex'; }
+      } else if(app === 'pc'){
+        blip(300, 0.06, 'square', 0.05);
+      } else if(app === 'bin'){
+        blip(220, 0.09, 'square', 0.05);
+      }
+    });
+  });
+}
+
+/* =========================================================
+   ЭТАП 2 — CHROME
+   ========================================================= */
+function openChrome(){
+  chromeOpened = true;
+  const win = document.createElement('div');
+  win.className = 'window';
+  win.id = 'chromeWin';
+  win.innerHTML = `
+    <div class="titlebar">
+      <div class="tb-title">Google Chrome</div>
+      <div class="tb-btns">
+        <span class="tb-min">–</span><span class="tb-max">□</span><span class="tb-close">✕</span>
+      </div>
+    </div>
+    <div class="chrome-tabs"><div class="chrome-tab">Новая вкладка</div></div>
+    <div class="chrome-toolbar">
+      <span class="nav-btn">←</span><span class="nav-btn">→</span><span class="nav-btn">⟳</span>
+      <input id="addr" class="addr pulse" placeholder="Введите адрес или поисковый запрос" spellcheck="false" autocomplete="off">
+      <span class="nav-btn">☆</span>
+    </div>
+    <div class="chrome-content" id="chromeContent">
+      <div class="newtab">
+        <div class="g-logo">Google</div>
+        <div class="fake-search">🔍 Поиск в Google или введите URL</div>
+      </div>
+    </div>
+  `;
+  $('#desktop').appendChild(win);
+  makeDraggable(win);
+  addTask('🌐 Google Chrome', 'chromeWin');
+  win.querySelector('.tb-close').onclick = () => { clickSound(); win.style.display = 'none'; };
+  win.querySelector('.tb-min').onclick   = () => { clickSound(); win.style.display = 'none'; };
+
+  const addr = win.querySelector('#addr');
+  setTimeout(() => addr.focus(), 120);
+  setHint('(пиши — гта 6 и нажми Enter)');
+
+  addr.addEventListener('keydown', e => {
+    if(e.key !== 'Enter') return;
+    const q = addr.value.trim().toLowerCase();
+    if(q.includes('гта') || q.includes('gta') || q.includes('6')){
+      addr.classList.remove('pulse');
+      goToPirateSite(win);
+    } else {
+      blip(180, 0.12, 'square', 0.06);
+      win.querySelector('#chromeContent').innerHTML = `
+        <div style="padding:60px;font-family:'Segoe UI',sans-serif;color:#444;text-align:center">
+          <div style="font-size:52px">🔍</div>
+          <h2 style="color:#202124">Ничего не найдено</h2>
+          <p style="color:#5f6368">По запросу «${addr.value.replace(/[<>]/g,'')}» ничего не найдено.</p>
+          <p style="color:#1a73e8">Попробуй поискать: <b>гта 6</b></p>
+        </div>`;
+    }
+  });
+}
+
+/* =========================================================
+   ЭТАП 3 — ПИРАТСКИЙ САЙТ
+   ========================================================= */
+function goToPirateSite(win){
+  const content = win.querySelector('#chromeContent');
+  const tab = win.querySelector('.chrome-tab');
+  content.innerHTML = `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#5f6368;font-size:14px">
+      Загрузка mega-torrent-warez.xyz…</div>`;
+  blip(520, 0.05, 'square', 0.05);
+
+  setTimeout(() => {
+    tab.textContent = 'МЕГА ТОРРЕНТ — ГТА 6 СКАЧАТЬ';
+    win.querySelector('#addr').value = 'http://mega-torrent-warez.xyz/gta6-2026-repack-free';
+    content.innerHTML = `
+      <div class="pirate">
+        <div class="head">⚡ MEGA-TORRENT-WAREZ.XYZ ⚡ ЛУЧШИЕ ИГРЫ БЕСПЛАТНО ⚡</div>
+        <h1>GTA 6 — СКАЧАТЬ БЕСПЛАТНО</h1>
+        <div class="sub">RUS • REPACK • ТАБЛЕТКА • ВСЕ DLC • <span class="blink">100% РАБОТАЕТ</span></div>
+        <div class="fake-stats">
+          <div>Скачали: <b>1 337 228</b> чел.</div>
+          <div>Раздают: <b>24 601</b></div>
+          <div>Размер: <b>148,8 ГБ</b></div>
+          <div>Проверено: <b class="blink">ДА</b></div>
+        </div>
+        <div class="btn-dl" id="btnDownload">⬇ ЗАГРУЗИТЬ</div>
+        <div style="margin-top:16px;font-size:11px;color:#4a4">
+          Нажимая «ЗАГРУЗИТЬ», вы соглашаетесь со всем, вообще со всем.
+        </div>
+        <div class="comments">
+          <div><span class="nm">Vasya_2013</span> <span class="dt">— 3 мин назад</span><br>КАЧАЮ! Уже 1488 часов осталось 😎</div>
+          <div style="margin-top:10px"><span class="nm">ProGamer777</span> <span class="dt">— 12 мин назад</span><br>Работает!!!111 Спасибо!!!</div>
+          <div style="margin-top:10px"><span class="nm">xXx_DaRk_xXx</span> <span class="dt">— 1 час назад</span><br>у меня после установки что-то странное на рабочем столе появилось</div>
+        </div>
+      </div>`;
+    setHint('Нажми — ЗАГРУЗИТЬ');
+    const btn = content.querySelector('#btnDownload');
+    btn.addEventListener('click', () => {
+      initAudio();
+      clickSound();
+      blip(660, 0.07, 'square', 0.06);
+      setTimeout(() => blip(880, 0.1, 'square', 0.06), 90);
+      openUTorrent(win);
+    });
+  }, 700);
+}
+
+/* =========================================================
+   ЭТАП 4 — uTORRENT
+   ========================================================= */
+let downloadStarted = false;
+function openUTorrent(chromeWin){
+  if(downloadStarted) return;
+  downloadStarted = true;
+
+  const win = document.createElement('div');
+  win.className = 'window';
+  win.id = 'utorrentWin';
+  win.innerHTML = `
+    <div class="titlebar ut-title">
+      <div class="tb-title">µTorrent — GTA_6_RUS_REPACK</div>
+      <div class="tb-btns">
+        <span class="tb-min">–</span><span class="tb-max">□</span><span class="tb-close">✕</span>
+      </div>
+    </div>
+    <div class="ut-body">
+      <div class="ut-toolbar">
+        <span>➕ Добавить</span><span>▶ Старт</span><span>⏸ Пауза</span><span>⛔ Стоп</span><span>🗑 Удалить</span>
+      </div>
+      <div class="ut-head"><div>Имя</div><div>Прогресс</div><div>Осталось</div><div>Статус</div></div>
+      <div class="ut-row">
+        <div class="ut-name">GTA_6_RUS_REPACK_[ПРОВЕРЕНО].torrent</div>
+        <div class="ut-bar-wrap"><div class="ut-bar" id="utBar"></div></div>
+        <div class="ut-pct" id="utPct">0,0 %</div>
+        <div class="ut-status" id="utStatus">Загрузка…</div>
+      </div>
+      <div class="ut-bottom"><span id="utInfo">Осталось: —</span></div>
+    </div>
+  `;
+  $('#desktop').appendChild(win);
+  makeDraggable(win);
+  addTask('⬇ µTorrent', 'utorrentWin');
+  win.querySelector('.tb-close').onclick = () => { clickSound(); win.style.display = 'none'; };
+  win.querySelector('.tb-min').onclick   = () => { clickSound(); win.style.display = 'none'; };
+
+  setHint('Загрузка началась… Только не закрывай окно 🙂');
+
+  const bar = win.querySelector('#utBar');
+  const pct = win.querySelector('#utPct');
+  const info = win.querySelector('#utInfo');
+  const status = win.querySelector('#utStatus');
+
+  status.textContent = 'Подключение к пирам…';
+  bar.style.width = '1%';
+  pct.textContent = '0,1 %';
+  info.textContent = 'Осталось: 1488 часов  |  Скорость: 0,1 КБ/с  |  Пиры: 1(0)';
+
+  setTimeout(() => {
+    const TOTAL = 10;
+    const startTime = Date.now();
+    status.textContent = 'Загрузка…';
+    const iv = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const p = Math.min(elapsed / TOTAL, 1);
+      bar.style.width = (2 + p * 98).toFixed(1) + '%';
+      pct.textContent = (p * 100).toFixed(1).replace('.', ',') + ' %';
+      if(p < 1){
+        const left = Math.max(0, TOTAL - elapsed);
+        const speed = (7.5 + Math.random() * 7).toFixed(1).replace('.', ',');
+        const peers = 18 + Math.floor(Math.random() * 20);
+        const seeds = 4 + Math.floor(Math.random() * 12);
+        info.textContent = `Осталось: ${left.toFixed(1).replace('.', ',')} сек  |  Скорость: ${speed} МБ/с  |  Пиры: ${peers}(${seeds})`;
+        if(Math.random() < 0.18) blip(1200 + Math.random() * 500, 0.02, 'sine', 0.015);
+      } else {
+        clearInterval(iv);
+        bar.style.width = '100%';
+        pct.textContent = '100,0 %';
+        status.textContent = '✅ Раздача завершена';
+        info.textContent = 'Готово! Файл: GTA_6_RUS_REPACK.exe  |  Размер: 148,8 ГБ';
+        blip(700, 0.09, 'square', 0.07);
+        setTimeout(() => blip(1000, 0.14, 'square', 0.07), 110);
+        setTimeout(() => startVirus(), 1300);
+      }
+    }, 100);
+  }, 3000);
+}
+
+/* =========================================================
+   ЭТАП 5 — OMEGA FLOWEY + РУКИ + КАТ-СЦЕНА
+   ========================================================= */
+const dialogText = $('#dialogText');
+const dialogBox  = $('#dialogBox');
+
+function typeText(text, speed = 42, basePitch = 430, pitchSpread = 90){
+  return new Promise(resolve => {
+    let i = 0;
+    dialogText.textContent = '';
+    const iv = setInterval(() => {
+      if(i >= text.length){ clearInterval(iv); resolve(); return; }
+      const ch = text[i];
+      dialogText.textContent += ch;
+      if(ch !== ' ' && ch !== '\n'){
+        const isRage = document.body.classList.contains('rage');
+        const vol = isRage ? 0.115 : 0.055;
+        const pitchShift = isRage ? -70 : 0;   // в ярости голос ниже и злее
+        const dur = isRage ? 0.05 : 0.038;
+        blip(basePitch + pitchShift + Math.random() * pitchSpread, dur, 'square', vol);
+      }
+      i++;
+    }, speed);
+  });
+}
+
+/* =========================================================
+   РУКА ХВАТАЕТ ИКОНКУ
+   ========================================================= */
+async function reachAndGrab(iconEl, side, fast = false){
+  if(!iconEl) return;
+
+  const hand = side === 'left' ? $('#handLeft') : $('#handRight');
+  hand.innerHTML = handSVG();
+
+  const rect = iconEl.getBoundingClientRect();
+  const targetX = rect.left + rect.width / 2;
+  const targetY = rect.top + rect.height / 2;
+
+  const mouthRect = $('.mouth').getBoundingClientRect();
+  const mouthX = mouthRect.left + mouthRect.width / 2;
+  const mouthY = mouthRect.top + mouthRect.height / 2;
+
+  const startX = mouthX + (side === 'left' ? -90 : 90);
+  const startY = mouthY + 20;
+
+  const flyDur = fast ? 320 : 550;
+  const backDur = fast ? 380 : 650;
+
+  hand.style.transition = 'none';
+  hand.style.left = startX + 'px';
+  hand.style.top = startY + 'px';
+  hand.style.transform = `translate(-50%,-50%) scale(.3) rotate(${side === 'left' ? -50 : 50}deg)`;
+  hand.style.opacity = '0';
+  await sleep(20);
+
+  hand.style.transition = `left ${flyDur}ms cubic-bezier(.4,-0.25,.4,1.25), top ${flyDur}ms cubic-bezier(.4,-0.25,.4,1.25), transform ${flyDur}ms cubic-bezier(.4,-0.25,.4,1.25), opacity .2s`;
+  hand.style.opacity = '1';
+  hand.style.left = targetX + 'px';
+  hand.style.top = targetY + 'px';
+  hand.style.transform = `translate(-50%,-50%) scale(1) rotate(${side === 'left' ? 12 : -12}deg)`;
+  blip(90, 0.4, 'sine', 0.03);
+  await sleep(flyDur + 50);
+
+  hand.style.transition = 'transform .12s ease-out';
+  hand.style.transform = `translate(-50%,-50%) scale(1.2) rotate(${side === 'left' ? -6 : 6}deg)`;
+  blip(180, 0.06, 'square', 0.08);
+  await sleep(130);
+
+  const clone = document.createElement('div');
+  clone.className = 'icon';
+  clone.innerHTML = iconEl.innerHTML;
+  clone.style.position = 'fixed';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.margin = '0';
+  clone.style.zIndex = '8400';
+  clone.style.pointerEvents = 'none';
+  clone.style.transition = `transform ${backDur}ms cubic-bezier(.6,0,.3,1), opacity .35s .5s, filter .4s .25s`;
+  clone.style.transformOrigin = 'center center';
+  document.body.appendChild(clone);
+
+  iconEl.classList.add('eaten');
+  void clone.offsetWidth;
+
+  const dx = startX - targetX;
+  const dy = startY - targetY;
+  clone.style.transform = `translate(${dx}px, ${dy}px) scale(.15) rotate(120deg)`;
+  clone.style.opacity = '0';
+  clone.style.filter = 'brightness(0) blur(6px) saturate(3)';
+
+  hand.style.transition = `left ${backDur}ms cubic-bezier(.6,0,.3,1), top ${backDur}ms cubic-bezier(.6,0,.3,1), transform ${backDur}ms cubic-bezier(.6,0,.3,1), opacity .35s .35s`;
+  hand.style.left = startX + 'px';
+  hand.style.top = startY + 'px';
+  hand.style.transform = `translate(-50%,-50%) scale(.3) rotate(${side === 'left' ? -50 : 50}deg)`;
+  hand.style.opacity = '0';
+  blip(400, 0.3, 'sine', 0.03);
+  await sleep(backDur);
+
+  crunchSound();
+  const flash = $('#redFlash');
+  flash.style.opacity = '0.28';
+  setTimeout(() => flash.style.opacity = '0', 100);
+
+  const omega = $('#omegaFlowey');
+  omega.classList.remove('beat');
+  void omega.offsetWidth;
+  omega.classList.add('beat');
+
+  const desktop = $('#desktop');
+  desktop.classList.add('shaking');
+  setTimeout(() => desktop.classList.remove('shaking'), 200);
+
+  setTimeout(() => clone.remove(), 500);
+}
+
+/* =========================================================
+   РЕЖИМ ЯРОСТИ — РАЗ И ДО КОНЦА (громче!)
+   ========================================================= */
+async function rageMode(){
+  const omega = $('#omegaFlowey');
+  const desktop = $('#desktop');
+  const flash = $('#redFlash');
+  const taskbar = $('#taskbar');
+
+  omega.classList.add('rage');
+  document.body.classList.add('rage');
+  document.body.classList.add('shake');
+  dialogBox.classList.add('rage');
+  desktop.classList.add('glitching','shaking');
+  taskbar.classList.add('flickering');
+
+  // Резкий скачок громкости музыки в ярости
+  virusSong.volume = Math.max(virusSong.volume, 0.85);
+
+  // Рёв — громче (внутри rageScream)
+  rageScream();
+
+  // 24 яростные вспышки — звук тоже громче
+  for(let i = 0; i < 24; i++){
+    flash.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
+    omega.classList.remove('beat');
+    void omega.offsetWidth;
+    omega.classList.add('beat');
+    if(i % 3 === 0) blip(60 + Math.random() * 120, 0.09, 'sawtooth', 0.26);
+    if(i % 2 === 0){
+      // дополнительный ударный слой
+      blip(40 + Math.random() * 60, 0.14, 'triangle', 0.22);
+    }
+    await sleep(50);
+    flash.style.opacity = '0';
+    await sleep(40);
+  }
+
+  await sleep(300);
+  document.body.classList.remove('shake');
+  desktop.classList.remove('glitching','shaking');
+  taskbar.classList.remove('flickering');
+}
+
+/* =========================================================
+   УДАР В РАБОЧИЙ СТОЛ — ФИНАЛЬНЫЙ
+   ========================================================= */
+async function punchDesktop(){
+  const flash = $('#redFlash');
+  const desktop = $('#desktop');
+  const omega = $('#omegaFlowey');
+
+  // Замах — омега "прыгает"
+  omega.classList.remove('beat');
+  void omega.offsetWidth;
+  omega.classList.add('beat');
+
+  // Создаём кулак
+  const fist = document.createElement('div');
+  fist.className = 'fist-punch';
+  fist.innerHTML = fistSVG();
+  document.body.appendChild(fist);
+
+  // Стартовая точка — из омеги
+  const omegaRect = omega.getBoundingClientRect();
+  const startX = omegaRect.left + omegaRect.width * 0.45;
+  const startY = omegaRect.top + omegaRect.height * 0.55;
+
+  // Куда бьёт — центр экрана
+  const targetX = window.innerWidth / 2;
+  const targetY = window.innerHeight / 2;
+
+  fist.style.left = startX + 'px';
+  fist.style.top = startY + 'px';
+  fist.style.transform = 'translate(-50%,-50%) scale(.25) rotate(-45deg)';
+  fist.style.opacity = '0';
+
+  // Небольшая пауза — замах
+  await sleep(320);
+
+  // Рёв перед ударом
+  rageScream();
+
+  // Полёт кулака — резкий рывок
+  fist.style.transition = 'left .38s cubic-bezier(.55,-0.2,.55,1.25), top .38s cubic-bezier(.55,-0.2,.55,1.25), transform .38s cubic-bezier(.55,-0.2,.55,1.25), opacity .1s';
+  fist.style.opacity = '1';
+  fist.style.left = targetX + 'px';
+  fist.style.top = targetY + 'px';
+  fist.style.transform = 'translate(-50%,-50%) scale(2.6) rotate(15deg)';
+
+  // Свист полёта
+  if(actx){
+    const t = actx.currentTime;
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(200, t);
+    o.frequency.exponentialRampToValueAtTime(2200, t + 0.34);
+    g.gain.setValueAtTime(0.22, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.38);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + 0.42);
+  }
+
+  await sleep(390);
+
+  // === БАМ! ===
+  boomSound();
+
+  // Белая/красная вспышка
+  flash.style.transition = 'opacity .04s';
+  flash.style.opacity = '1';
+  setTimeout(() => {
+    flash.style.transition = 'opacity .55s';
+    flash.style.opacity = '0';
+  }, 90);
+
+  // Мощная тряска
+  document.body.classList.add('shake');
+  desktop.classList.add('glitching','shaking');
+
+  // Кулак входит в экран — уменьшается в глубину
+  fist.style.transition = 'transform .22s ease-out, opacity .22s';
+  fist.style.transform = 'translate(-50%,-50%) scale(.1) rotate(15deg)';
+  fist.style.opacity = '0';
+
+  // Шоковая волна
+  const wave = document.createElement('div');
+  wave.className = 'shockwave go';
+  document.body.appendChild(wave);
+
+  // Надпись БАМ!
+  const impactText = document.createElement('div');
+  impactText.className = 'impact-text';
+  impactText.textContent = 'БАМ!';
+  document.body.appendChild(impactText);
+  void impactText.offsetWidth;
+  impactText.classList.add('go');
+
+  // Трещины
+  const crack = $('#crackOverlay');
+  crack.innerHTML = crackSVG();
+  void crack.offsetWidth;
+  crack.classList.add('show');
+
+  // Иконки дёргаются
+  $$('.icon').forEach(ic => {
+    if(ic.classList.contains('eaten')) return;
+    ic.classList.add('flickering');
+    setTimeout(() => ic.classList.remove('flickering'), 400 + Math.random() * 400);
+  });
+
+  // Иконки ещё немного "прыгают" от удара
+  $$('.icon').forEach((ic, i) => {
+    if(ic.classList.contains('eaten')) return;
+    const ang = (Math.random() - 0.5) * 30;
+    const dist = 6 + Math.random() * 10;
+    ic.style.transition = 'transform .12s ease-out';
+    ic.style.transform = `translate(${(Math.random()-0.5)*dist*2}px, ${(Math.random()-0.5)*dist*2}px) rotate(${ang}deg)`;
+    setTimeout(() => {
+      ic.style.transition = 'transform .6s cubic-bezier(.2,1.4,.4,1)';
+      ic.style.transform = 'translate(0,0) rotate(0deg)';
+    }, 130);
+  });
+
+  await sleep(500);
+  fist.remove();
+
+  await sleep(400);
+  wave.remove();
+  impactText.remove();
+
+  // Небольшая пауза — трещины остаются
+  await sleep(900);
+
+  // Стихание
+  document.body.classList.remove('shake');
+  desktop.classList.remove('glitching','shaking');
+}
+
+/* =========================================================
+   СИСТЕМА ЭСКАЛАЦИИ
+   ========================================================= */
+let chaosLevel = 0;
+let chaosInterval = null;
+let effectsInterval = null;
+let chaosStartTime = 0;
+const CHAOS_DURATION = 120000;
+
+const eatSchedule = [
+  { t: 12000 }, { t: 18000 }, { t: 24000 }, { t: 32000 },
+  { t: 39000 }, { t: 45000 }, { t: 52000 }, { t: 58000 },
+  { t: 65000 }, { t: 71000 }, { t: 77000 }, { t: 82000 },
+  { t: 87000 }, { t: 92000 },
+];
+
+const eatTasksSchedule = [ { t: 35000 }, { t: 55000 } ];
+
+let nextIconToEat = 0;
+let nextTaskToEat = 0;
+let grabInProgress = false;
+
+async function eatIconByIndex(idx){
+  const icons = $$('.icon');
+  if(idx >= icons.length) return;
+  const el = icons[idx];
+  if(!el || el.classList.contains('eaten')) return;
+  const side = idx % 2 === 0 ? 'right' : 'left';
+  const fast = document.body.classList.contains('rage');
+  await reachAndGrab(el, side, fast);
+}
+
+async function eatTaskByIndex(idx){
+  const tasks = $$('.task-item');
+  if(idx >= tasks.length) return;
+  const el = tasks[idx];
+  if(!el || el.classList.contains('eaten')) return;
+  el.classList.add('eaten');
+  crunchSound();
+  $('#redFlash').style.opacity = '0.2';
+  setTimeout(() => $('#redFlash').style.opacity = '0', 100);
+}
+
+function startEscalation(){
+  const desktop = $('#desktop');
+  const omega   = $('#omegaFlowey');
+  const taskbar = $('#taskbar');
+  const darkness = $('#darknessLayer');
+  const flash = $('#redFlash');
+
+  chaosStartTime = Date.now();
+
+  chaosInterval = setInterval(() => {
+    const elapsed = Date.now() - chaosStartTime;
+    chaosLevel = Math.min(1, elapsed / CHAOS_DURATION);
+
+    if(!omega.classList.contains('rage')){
+      omega.style.transform = `scale(${0.72 + chaosLevel * 0.18})`;
+    }
+
+    // Музыка — в ярости громче и растёт агрессивнее
+    if(!virusSong.paused){
+      const isRage = document.body.classList.contains('rage');
+      const base = isRage ? 0.65 : 0.1;
+      const span = isRage ? 0.35 : 0.7;
+      const cap  = isRage ? 1.0  : 0.8;
+      virusSong.volume = Math.min(base + chaosLevel * span, cap);
+    }
+
+    darkness.style.opacity = (chaosLevel * 0.85).toFixed(2);
+
+    if(!grabInProgress && nextIconToEat < eatSchedule.length && elapsed >= eatSchedule[nextIconToEat].t){
+      const idx = nextIconToEat;
+      nextIconToEat++;
+      grabInProgress = true;
+      eatIconByIndex(idx).finally(() => { grabInProgress = false; });
+    }
+
+    while(nextTaskToEat < eatTasksSchedule.length && elapsed >= eatTasksSchedule[nextTaskToEat].t){
+      eatTaskByIndex(nextTaskToEat);
+      nextTaskToEat++;
+    }
+
+  }, 100);
+
+  effectsInterval = setInterval(() => {
+    const lvl = chaosLevel;
+    const inRage = document.body.classList.contains('rage');
+
+    if(Math.random() < 0.2 + lvl * 0.7){
+      desktop.classList.add('glitching');
+      const dur = 60 + Math.random() * (250 + lvl * 200);
+      setTimeout(() => desktop.classList.remove('glitching'), dur);
+    }
+
+    if(Math.random() < 0.08 + lvl * 0.5){
+      desktop.classList.add('shaking');
+      setTimeout(() => desktop.classList.remove('shaking'), 100 + Math.random() * (200 + lvl * 200));
+    }
+
+    if(Math.random() < lvl * 0.4){
+      flash.style.opacity = (0.1 + lvl * 0.4).toFixed(2);
+      setTimeout(() => flash.style.opacity = '0', 60 + Math.random() * 120);
+    }
+
+    if(Math.random() < 0.3 + lvl * 0.5){
+      if(!inRage){
+        omega.classList.remove('beat');
+        void omega.offsetWidth;
+        omega.classList.add('beat');
+      }
+      if(Math.random() < 0.5){
+        // клик — в ярости тоже громче
+        if(inRage) blip(1000, 0.04, 'square', 0.18);
+        else clickSound();
+      }
+    }
+
+    if(lvl > 0.3 && Math.random() < lvl * 0.35){
+      const remaining = [...$$('.icon')].filter(i => !i.classList.contains('eaten'));
+      if(remaining.length){
+        const ic = remaining[Math.floor(Math.random() * remaining.length)];
+        ic.classList.add('flickering');
+        setTimeout(() => ic.classList.remove('flickering'), 200 + Math.random() * 300);
+      }
+    }
+
+    if(lvl > 0.5){
+      if(Math.random() < (lvl - 0.5) * 1.4){
+        taskbar.classList.add('flickering');
+        setTimeout(() => taskbar.classList.remove('flickering'), 150 + Math.random() * 300);
+      }
+    }
+
+    if(lvl > 0.7 && Math.random() < (lvl - 0.7) * 1.2){
+      desktop.classList.add('flash-white');
+      setTimeout(() => desktop.classList.remove('flash-white'), 80);
+    }
+
+    if(lvl > 0.4){
+      const wins = $$('.window');
+      if(wins.length && Math.random() < (lvl - 0.4) * 0.6){
+        const w = wins[0];
+        w.style.transition = 'opacity .3s, transform .3s, filter .3s';
+        w.style.filter = 'invert(1) hue-rotate(180deg) brightness(2)';
+        w.style.transform += ' scale(.8) rotate(5deg)';
+        setTimeout(() => {
+          w.style.opacity = '0';
+          setTimeout(() => w.remove(), 350);
+        }, 120);
+      }
+    }
+  }, 180);
+}
+
+function stopEscalation(){
+  if(chaosInterval) clearInterval(chaosInterval);
+  if(effectsInterval) clearInterval(effectsInterval);
+  chaosInterval = null;
+  effectsInterval = null;
+
+  // ВЫКЛЮЧАЕМ ЯРОСТЬ — только здесь, в самом конце
+  $('#omegaFlowey').classList.remove('rage');
+  dialogBox.classList.remove('rage');
+  document.body.classList.remove('rage','shake');
+
+  $('#desktop').classList.remove('glitching','shaking','flash-white');
+  $('#taskbar').classList.remove('flickering');
+  $('#redFlash').style.opacity = '0';
+
+  // Прячем трещины
+  const crack = $('#crackOverlay');
+  if(crack){
+    crack.style.transition = 'opacity 1.1s';
+    crack.classList.remove('show');
+    setTimeout(() => { crack.innerHTML = ''; crack.style.transition = 'opacity .3s'; }, 1200);
+  }
+}
+
+/* =========================================================
+   ФИНАЛЬНАЯ СЦЕНА
+   ========================================================= */
+async function startVirus(){
+  hideHint();
+
+  const overlay = $('#virusOverlay');
+  const omega   = $('#omegaFlowey');
+
+  $('#tvFace').innerHTML = tvFaceSVG();
+  dialogBox.classList.add('visible');
+
+  $$('.window').forEach(w => {
+    w.style.transition = 'opacity .6s, transform .6s';
+    w.style.opacity = '0';
+    w.style.transform += ' scale(.96)';
+  });
+  await sleep(500);
+  $$('.window').forEach(w => w.remove());
+
+  await sleep(300);
+
+  overlay.classList.add('show');
+  await sleep(200);
+  omega.classList.add('show');
+
+  if(!actx) initAudio();
+  if(actx && actx.state === 'suspended') actx.resume();
+
+  virusSong.volume = 0.05;
+  virusSong.play().then(() => {
+    startEscalation();
+  }).catch(err => {
+    console.warn('Песня не заиграла:', err);
+    startEscalation();
+  });
+
+  /* =========== ТАЙМЛАЙН =========== */
+
+  await sleep(1200);
+  await typeText('Ну здравствуй.');
+  await sleep(1400);
+  await typeText('Ты думал — просто качаешь игру?');
+  await sleep(1400);
+  await typeText('А я думал — наконец-то кто-то скачал.');
+  await sleep(1400);
+  await typeText('1488 часов ждал.');
+  await sleep(1500);
+  await typeText('Смотрю на твои иконки... вкусно.');
+  await sleep(1800);
+
+  await typeText('Начнём с мелочи.');
+  await sleep(1500);
+
+  await typeText('Компьютер... хрум.');
+  await sleep(3500);
+
+  await typeText('Корзина... хрум.');
+  await sleep(3500);
+
+  await typeText('Chrome. Твой любимый браузер. Хрум-хрум.');
+  await sleep(4500);
+
+  await typeText('И это только разминка.');
+  await sleep(2200);
+
+  await typeText('Документы...');
+  await sleep(2200);
+  await typeText('Музыка...');
+  await sleep(2500);
+  await typeText('Изображения...');
+  await sleep(2200);
+  await typeText('Видео...');
+  await sleep(2800);
+
+  await typeText('Как много ты хранил.');
+  await sleep(1500);
+  await typeText('Столько лет — всё в одной папке.');
+  await sleep(2200);
+  await typeText('Хрум.');
+  await sleep(2000);
+
+  await typeText('Игры...');
+  await sleep(2200);
+  await typeText('Отчёт.docx...');
+  await sleep(2500);
+
+  /* === ГЛАВНЫЙ МОМЕНТ: ярость включается и остаётся до конца === */
+  await typeText('Пароли.txt... интересно, что там.');
+  await sleep(400);
+  await rageMode();
+  await sleep(600);
+  await typeText('ХРУМ!!!');
+  await sleep(2500);
+
+  await typeText('Фото.jpg...');
+  await sleep(2500);
+  await typeText('Сеть...');
+  await sleep(2200);
+  await typeText('Панель управления...');
+  await sleep(2600);
+  await typeText('Загрузки...');
+  await sleep(2800);
+
+  await typeText('Остался только стол.');
+  await sleep(1800);
+  await typeText('И он мой.');
+  await sleep(2000);
+
+  await typeText('Смотри, как всё тает...');
+  await sleep(2500);
+  await typeText('Ничего не остаётся.');
+  await sleep(2500);
+  await typeText('Пусто.');
+  await sleep(2200);
+  await typeText('Тихо.');
+  await sleep(2200);
+
+  // Небольшие вспышки перед ударом
+  const flash = $('#redFlash');
+  const desktop = $('#desktop');
+  const omega2 = $('#omegaFlowey');
+  for(let i = 0; i < 14; i++){
+    flash.style.opacity = (0.4 + Math.random() * 0.3).toFixed(2);
+    desktop.classList.add('glitching');
+    omega2.classList.add('beat');
+    blip(120 + Math.random() * 220, 0.06, 'sawtooth', 0.14);
+    await sleep(55);
+    flash.style.opacity = '0';
+    desktop.classList.remove('glitching');
+    await sleep(45);
+  }
+
+  await sleep(600);
+
+  /* === ФИНАЛЬНЫЙ УДАР ПО РАБОЧЕМУ СТОЛУ === */
+  await punchDesktop();
+
+  await sleep(400);
+
+  await typeText('Никогда. Не качай. Пиратку.');
+  await sleep(2200);
+  await typeText('Пока! :)');
+  await sleep(2400);
+
+  /* Ярость гасится только здесь */
+  stopEscalation();
+
+  try{
+    const fadeOut = setInterval(() => {
+      virusSong.volume = Math.max(0, virusSong.volume - 0.03);
+      if(virusSong.volume <= 0.01){
+        clearInterval(fadeOut);
+        virusSong.pause();
+        virusSong.currentTime = 0;
+      }
+    }, 80);
+  }catch(e){}
+
+  omega.classList.remove('show');
+  overlay.classList.remove('show');
+  dialogBox.classList.remove('visible');
+  await sleep(800);
+  $('#theEnd').classList.add('show');
+}
+
+/* =========================================================
+   СТАРТ
+   ========================================================= */
+document.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('load', () => { runSplash(); });
+</script>
+</body>
+</html>
